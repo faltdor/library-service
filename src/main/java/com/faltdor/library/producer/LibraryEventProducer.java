@@ -24,7 +24,7 @@ public class LibraryEventProducer {
         Integer key = libraryEvent.getLibraryEvent();
         String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
         kafkaTemplate.sendDefault( key, value )
-                     .addCallback( result -> log.info( "Message sent SuccessFully for the key : {} and the value is {}, partition is {} ", key, value, result.getProducerRecord().partition() ),
+                     .addCallback( result -> log.info( "Message sent SuccessFully for the key : {} and the value is {}, partition is {} ", key, value, result.getRecordMetadata().partition() ),
                            ex -> log.error( "Error sending the message and exception is: {}", ex ) );
     }
 }
