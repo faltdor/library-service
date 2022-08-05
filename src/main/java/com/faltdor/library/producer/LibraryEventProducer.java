@@ -6,10 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -65,6 +69,8 @@ public class LibraryEventProducer {
 
     private ProducerRecord<Integer, String> buildProducerRecord( final String topic, final Integer key, final String value ) {
 
-        return new ProducerRecord<>( topic, null, key, value, null );
+        final List<Header> headers = List.of( new RecordHeader( "event-source", "scanner".getBytes() ),
+                                              new RecordHeader( "tenant", UUID.randomUUID().toString().getBytes() ) );
+        return new ProducerRecord<>( topic, null, key, value, headers );
     }
 }
