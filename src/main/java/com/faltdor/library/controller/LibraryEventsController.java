@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 
 @RestController
 @AllArgsConstructor
@@ -21,6 +24,14 @@ public class LibraryEventsController {
     public ResponseEntity<LibraryEvent> createLibraryEvent( @RequestBody LibraryEvent libraryEvent ) throws JsonProcessingException {
 
         libraryEventProducer.sendLibraryEvent( libraryEvent );
+
+        return ResponseEntity.status( HttpStatus.CREATED ).body( libraryEvent );
+    }
+
+    @PostMapping( "v1/libraryevent/sync" )
+    public ResponseEntity<LibraryEvent> createLibraryEventSync( @RequestBody LibraryEvent libraryEvent ) throws JsonProcessingException, ExecutionException, InterruptedException, TimeoutException {
+
+        libraryEventProducer.sendLibraryEventSynchronous( libraryEvent );
 
         return ResponseEntity.status( HttpStatus.CREATED ).body( libraryEvent );
     }
