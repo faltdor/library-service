@@ -15,5 +15,7 @@ public class LibraryEvent {
 
     private Integer libraryEvent;
 
+    private LibraryEventType libraryEventType;
+
     private Book book;
 }

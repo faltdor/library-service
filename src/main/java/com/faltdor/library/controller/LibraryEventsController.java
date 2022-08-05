@@ -1,6 +1,7 @@
 package com.faltdor.library.controller;
 
 import com.faltdor.library.domain.LibraryEvent;
+import com.faltdor.library.domain.LibraryEventType;
 import com.faltdor.library.producer.LibraryEventProducer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
@@ -20,16 +21,17 @@ public class LibraryEventsController {
 
     private final LibraryEventProducer libraryEventProducer;
 
-    @PostMapping( "v1/libraryevent" )
+    @PostMapping( "/v1/libraryevent" )
     public ResponseEntity<LibraryEvent> createLibraryEvent( @RequestBody LibraryEvent libraryEvent ) throws JsonProcessingException {
 
+        libraryEvent.setLibraryEventType( LibraryEventType.NEW );
         libraryEventProducer.sendLibraryEvent( libraryEvent );
         libraryEventProducer.sendLibraryEventToSpecificTopic( libraryEvent );
 
         return ResponseEntity.status( HttpStatus.CREATED ).body( libraryEvent );
     }
 
-    @PostMapping( "v1/libraryevent/sync" )
+    @PostMapping( "/v1/libraryevent/sync" )
     public ResponseEntity<LibraryEvent> createLibraryEventSync( @RequestBody LibraryEvent libraryEvent ) throws JsonProcessingException, ExecutionException, InterruptedException, TimeoutException {
 
         libraryEventProducer.sendLibraryEventSynchronous( libraryEvent );
