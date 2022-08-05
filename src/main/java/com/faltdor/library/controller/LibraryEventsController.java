@@ -24,6 +24,7 @@ public class LibraryEventsController {
     public ResponseEntity<LibraryEvent> createLibraryEvent( @RequestBody LibraryEvent libraryEvent ) throws JsonProcessingException {
 
         libraryEventProducer.sendLibraryEvent( libraryEvent );
+        libraryEventProducer.sendLibraryEventToSpecificTopic( libraryEvent );
 
         return ResponseEntity.status( HttpStatus.CREATED ).body( libraryEvent );
     }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class LibraryEventProducer {
 
+    private static final String LIBRARY_EVENTS_TOPIC = "library-events";
+
     private final KafkaTemplate<Integer, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper;
@@ -29,7 +32,7 @@ public class LibraryEventProducer {
         final String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
 
         try {
-            return kafkaTemplate.sendDefault( key, value ).get(1, TimeUnit.SECONDS);
+            return kafkaTemplate.sendDefault( key, value ).get( 1, TimeUnit.SECONDS );
         } catch ( ExecutionException | InterruptedException ex ) {
             log.error( "Error sending the message and exception is: {}", ex );
             throw ex;
@@ -46,5 +49,22 @@ public class LibraryEventProducer {
         kafkaTemplate.sendDefault( key, value )
                      .addCallback( result -> log.info( "Message sent SuccessFully for the key : {} and the value is {}, partition is {} ", key, value, result.getRecordMetadata().partition() ),
                            ex -> log.error( "Error sending the message and exception is: {}", ex ) );
+    }
+
+    public void sendLibraryEventToSpecificTopic( LibraryEvent libraryEvent ) throws JsonProcessingException {
+
+        final Integer key = libraryEvent.getLibraryEvent();
+        final String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
+
+        final ProducerRecord<Integer, String> producerRecord = buildProducerRecord( LIBRARY_EVENTS_TOPIC, key, value );
+
+        kafkaTemplate.send( producerRecord )
+                     .addCallback( result -> log.info( "Message sent SuccessFully for the key : {} and the value is {}, partition is {} ", key, value, result.getRecordMetadata().partition() ),
+                           ex -> log.error( "Error sending the message and exception is: {}", ex ) );
+    }
+
+    private ProducerRecord<Integer, String> buildProducerRecord( final String topic, final Integer key, final String value ) {
+
+        return new ProducerRecord<>( topic, null, key, value, null );
     }
 }
