@@ -49,4 +49,21 @@ public class LibraryEventsControllerTest {
         Mockito.verify( libraryEventProducer ).sendLibraryEvent( libraryEvent );
         Mockito.verify( libraryEventProducer ).sendLibraryEventToSpecificTopic( libraryEvent );
     }
+
+    @Test
+    void createLibraryEvent_withException() throws Exception {
+
+        // GIVEN
+        final LibraryEvent libraryEvent = LibraryEventsControllerIntegrationTest.buildLibraryEvent();
+        libraryEvent.setBook( null );
+        doNothing().when( libraryEventProducer ).sendLibraryEvent( libraryEvent );
+        doNothing().when( libraryEventProducer ).sendLibraryEventToSpecificTopic( libraryEvent );
+
+        //WHEN
+        //THEN
+        mockMvc.perform( post( "/v1/libraryevent" )
+              .content( objectMapper.writeValueAsString( libraryEvent ) )
+              .contentType( MediaType.APPLICATION_JSON ) )
+               .andExpect( status().is4xxClientError() ).;
+    }
 }
