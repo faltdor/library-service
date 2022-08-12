@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Data
 public class Book {
-    @NotNull
     private Integer bookId;
 
     @NotNull

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,5 +39,22 @@ public class LibraryEventsController {
         libraryEventProducer.sendLibraryEventSynchronous( libraryEvent );
 
         return ResponseEntity.status( HttpStatus.CREATED ).body( libraryEvent );
+    }
+
+
+
+    @PutMapping( "/v1/libraryevent" )
+    public ResponseEntity<?> updateLibraryEvent( @RequestBody @Valid LibraryEvent libraryEvent ) throws JsonProcessingException {
+
+
+        if(libraryEvent.getLibraryEvent() == null){
+            return ResponseEntity.status( HttpStatus.BAD_REQUEST ).body( "Library event id cannot be null" );
+        }
+
+        libraryEvent.setLibraryEventType( LibraryEventType.UPDATE );
+        libraryEventProducer.sendLibraryEvent( libraryEvent );
+        libraryEventProducer.sendLibraryEventToSpecificTopic( libraryEvent );
+
+        return ResponseEntity.status( HttpStatus.OK ).body( libraryEvent );
     }
 }

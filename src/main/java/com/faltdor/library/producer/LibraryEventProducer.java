@@ -33,7 +33,7 @@ public class LibraryEventProducer {
     public SendResult<Integer, String> sendLibraryEventSynchronous( LibraryEvent libraryEvent ) throws JsonProcessingException, ExecutionException, InterruptedException, TimeoutException {
 
         final Integer key = libraryEvent.getLibraryEvent();
-        final String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
+        final String value = objectMapper.writeValueAsString( libraryEvent );
 
         try {
             return kafkaTemplate.sendDefault( key, value ).get( 1, TimeUnit.SECONDS );
@@ -49,7 +49,7 @@ public class LibraryEventProducer {
     public void sendLibraryEvent( LibraryEvent libraryEvent ) throws JsonProcessingException {
 
         final Integer key = libraryEvent.getLibraryEvent();
-        final String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
+        final String value = objectMapper.writeValueAsString( libraryEvent );
         kafkaTemplate.sendDefault( key, value )
                      .addCallback( result -> log.info( "Message sent SuccessFully for the key : {} and the value is {}, partition is {} ", key, value, result.getRecordMetadata().partition() ),
                            ex -> log.error( "Error sending the message and exception is: {}", ex ) );
@@ -58,7 +58,7 @@ public class LibraryEventProducer {
     public void sendLibraryEventToSpecificTopic( LibraryEvent libraryEvent ) throws JsonProcessingException {
 
         final Integer key = libraryEvent.getLibraryEvent();
-        final String value = objectMapper.writeValueAsString( libraryEvent.getBook() );
+        final String value = objectMapper.writeValueAsString( libraryEvent );
 
         final ProducerRecord<Integer, String> producerRecord = buildProducerRecord( LIBRARY_EVENTS_TOPIC, key, value );
 
